@@ -28,10 +28,12 @@
     jsx,
     kvc,
     longfi,
+    erltss2,
     elli,
     jsonrpc2
    ]},
   {included_applications, [blockchain, sibyl]},
+  {optional_applications, [erltss2]}, %% not required to exist but _will_ be started before miner by systools
   {env,[]},
   {modules, []},
 
