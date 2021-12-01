@@ -56,7 +56,7 @@ case "$BUILD_TYPE" in
         ;;
     "miner-testnet")
         echo "Doing a testnet miner image build for ${IMAGE_ARCH}"
-        DOCKER_BUILD_ARGS="--build-arg EXTRA_BUILD_APK_PACKAGES=apk-tools --build-arg EXTRA_RUNNER_APK_PACKAGES=apk-tools --build-arg BUILDER_IMAGE=${BASE_IMAGE} --build-arg RUNNER_IMAGE=${BASE_IMAGE} --build-arg REBAR_BUILD_TARGET=docker_testminer ${DOCKER_BUILD_ARGS}"
+        DOCKER_BUILD_ARGS="--build-arg EXTRA_BUILD_APK_PACKAGES=apk-tools --build-arg EXTRA_RUNNER_APK_PACKAGES=apk-tools --build-arg BUILDER_IMAGE=${BUILD_IMAGE} --build-arg RUNNER_IMAGE=${BASE_IMAGE} --build-arg REBAR_BUILD_TARGET=docker_testminer ${DOCKER_BUILD_ARGS}"
         BASE_DOCKER_NAME=$(basename $(pwd))
         DOCKER_NAME="${BASE_DOCKER_NAME}-${IMAGE_ARCH}_${VERSION}"
         ;;
@@ -71,25 +71,25 @@ if [[ ! $TEST_BUILD ]]; then
     docker login -u="team-helium+buildkite" -p="${QUAY_BUILDKITE_PASSWORD}" ${REGISTRY_HOST}
 fi
 
-# update latest tag if github tag ends in `_GA` and don't do the rest of a build
-if [[ "$VERSION_TAG" =~ _GA$ ]]; then
-
-    echo "GA release detected: Updating latest tag on ${REGISTRY_HOST} for ${BUILD_TYPE}"
-
-    DOCKER_NAME=$(echo "$DOCKER_NAME" | sed -e 's/_GA//')
-
-    docker pull "$MINER_REGISTRY_NAME:$DOCKER_NAME"
-    docker tag "$MINER_REGISTRY_NAME:$DOCKER_NAME" "$MINER_REGISTRY_NAME:$LATEST_TAG"
-    docker push "$MINER_REGISTRY_NAME:$LATEST_TAG"
-
-    if [[ "$BUILD_TYPE" == "miner" ]]; then
-        echo "miner GA release detected: Updating 'GA' tag on ${REGISTRY_HOST} for ${VERSION}"
-        docker tag "$MINER_REGISTRY_NAME:$DOCKER_NAME" "$MINER_REGISTRY_NAME:${DOCKER_NAME}_GA"
-        docker push "$MINER_REGISTRY_NAME:${DOCKER_NAME}_GA"
-    fi
-
-    exit $?
-fi
+## update latest tag if github tag ends in `_GA` and don't do the rest of a build
+#if [[ "$VERSION_TAG" =~ _GA$ ]]; then
+#
+#    echo "GA release detected: Updating latest tag on ${REGISTRY_HOST} for ${BUILD_TYPE}"
+#
+#    DOCKER_NAME=$(echo "$DOCKER_NAME" | sed -e 's/_GA//')
+#
+#    docker pull "$MINER_REGISTRY_NAME:$DOCKER_NAME"
+#    docker tag "$MINER_REGISTRY_NAME:$DOCKER_NAME" "$MINER_REGISTRY_NAME:$LATEST_TAG"
+#    docker push "$MINER_REGISTRY_NAME:$LATEST_TAG"
+#
+#    if [[ "$BUILD_TYPE" == "miner" ]]; then
+#        echo "miner GA release detected: Updating 'GA' tag on ${REGISTRY_HOST} for ${VERSION}"
+#        docker tag "$MINER_REGISTRY_NAME:$DOCKER_NAME" "$MINER_REGISTRY_NAME:${DOCKER_NAME}_GA"
+#        docker push "$MINER_REGISTRY_NAME:${DOCKER_NAME}_GA"
+#    fi
+#
+#    exit $?
+#fi
 
 docker build $DOCKER_BUILD_ARGS -t "helium:${DOCKER_NAME}" .
 docker tag "helium:$DOCKER_NAME" "$MINER_REGISTRY_NAME:$DOCKER_NAME"
