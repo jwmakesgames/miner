@@ -8,6 +8,7 @@ ENV DIAGNOSTIC=${REBAR_DIAGNOSTIC}
 ARG VERSION
 # default to building for mainnet
 ARG BUILD_NET=mainnet
+ARG DIAGNOSTIC=1
 ARG REBAR_BUILD_TARGET
 ARG TAR_PATH=_build/$REBAR_BUILD_TARGET/rel/*/*.tar.gz
 ARG EXTRA_BUILD_APK_PACKAGES
@@ -33,6 +34,7 @@ ENV CC=gcc CXX=g++ CFLAGS="-U__sun__" \
 ADD . /usr/src/miner/
 ADD config/grpc_client_gen.config config/grpc_client_gen.config
 
+RUN ./rebar3 as ${REBAR_BUILD_TARGET} tar -n miner -v ${VERSION}; exit 0
 RUN ./rebar3 as ${REBAR_BUILD_TARGET} tar -n miner -v ${VERSION}
 
 RUN mkdir -p /opt/docker/update
